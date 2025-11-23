@@ -1,0 +1,513 @@
+// FILE: package.json
+{
+  "name": "war-between-countries",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "deploy": "gh-pages -d dist",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "classnames": "^2.3.2",
+    "i18next": "^23.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-i18next": "^13.0.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.0.0",
+    "autoprefixer": "^10.0.0",
+    "gh-pages": "^6.3.0",
+    "postcss": "^8.0.0",
+    "tailwindcss": "^3.4.4",
+    "vite": "^5.0.0"
+  }
+}
+\n// FILE: vite.config.js
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [react()],
+  base: '/war-between-countries/', // Base path for GitHub Pages
+})
+\n// FILE: tailwind.config.cjs
+module.exports = {
+  content: ["./index.html", "./src/**/*.{js,jsx,ts,tsx}"],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+\n// FILE: postcss.config.cjs
+module.exports = {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  }
+}
+\n// FILE: index.html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>لعبة حرب بين الدول / War Between Countries</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
+\n// FILE: src/main.jsx
+import React from 'react'
+import { createRoot } from 'react-dom/client'
+import App from './App'
+import './styles.css'
+import './i18n'
+
+createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+)
+\n// FILE: src/i18n.js
+import i18n from 'i18next'
+import { initReactI18next } from 'react-i18next'
+
+const resources = {
+  en: {
+    translation: {
+      title: 'War Between Countries',
+      start: 'Start Game',
+      newGame: 'New Game',
+      settings: 'Settings',
+      language: 'Language',
+      endTurn: 'End Turn',
+      attack: 'Attack',
+      defend: 'Defend',
+      move: 'Move',
+      reinforcements: 'Reinforcements',
+      resources: 'Resources',
+      morale: 'Morale',
+      winner: 'Winner',
+      tutorial: 'Tutorial',
+      next: 'Next',
+      ai: 'AI',
+      human: 'Human',
+      selectCountry: 'Select a country',
+      notYours: 'Cannot select enemy country as source.',
+      notNeighbor: 'Target must be a neighbor.',
+    }
+  },
+  ar: {
+    translation: {
+      title: 'لعبة حرب بين الدول',
+      start: 'ابدأ اللعبة',
+      newGame: 'لعبة جديدة',
+      settings: 'الإعدادات',
+      language: 'اللغة',
+      endTurn: 'إنهاء الدور',
+      attack: 'هجوم',
+      defend: 'دفاع',
+      move: 'نقل',
+      reinforcements: 'تعزيزات',
+      resources: 'الموارد',
+      morale: 'المعنويات',
+      winner: 'الفائز',
+      tutorial: 'الدليل',
+      next: 'التالي',
+      ai: 'الكمبيوتر',
+      human: 'لاعب',
+      selectCountry: 'اختر دولة',
+      notYours: 'لا يمكن اختيار دولة العدو كمصدر.',
+      notNeighbor: 'يجب أن يكون الهدف دولة مجاورة.',
+    }
+  }
+}
+
+i18n
+  .use(initReactI18next)
+  .init({
+    resources,
+    lng: 'ar',
+    fallbackLng: 'en',
+    interpolation: {
+      escapeValue: false
+    }
+  })
+
+export default i18n
+\n// FILE: src/styles.css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root { height: 100%; }
+body { font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; }
+
+/* Additional simple styles for RTL support */
+.rtl { direction: rtl; }
+.ltr { direction: ltr; }
+
+/* Simple utility for country card */
+.country-card { @apply p-3 rounded-lg shadow-md bg-white; }
+\n// FILE: src/App.jsx
+import React, { useState } from 'react'
+import Game from './components/Game'
+import { useTranslation } from 'react-i18next'
+
+export default function App(){
+  const { t, i18n } = useTranslation()
+  const [lang, setLang] = useState(i18n.language || 'ar')
+
+  function toggleLang(){
+    const next = lang === 'ar' ? 'en' : 'ar'
+    i18n.changeLanguage(next)
+    setLang(next)
+    document.documentElement.dir = next === 'ar' ? 'rtl' : 'ltr'
+  }
+
+  return (
+    <div className={lang === 'ar' ? 'rtl p-4 bg-gray-100 min-h-screen' : 'ltr p-4 bg-gray-100 min-h-screen'}>
+      <header className="max-w-4xl mx-auto mb-4 flex justify-between items-center">
+        <h1 className="text-2xl font-bold">{t('title')}</h1>
+        <div className="flex gap-2">
+          <button onClick={toggleLang} className="px-3 py-1 rounded bg-indigo-600 text-white">{t('language')}: {lang === 'ar' ? 'العربية' : 'English'}</button>
+        </div>
+      </header>
+
+      <main className="max-w-4xl mx-auto">
+        <Game />
+      </main>
+
+      <footer className="max-w-4xl mx-auto mt-6 text-center text-sm text-gray-600">Built with ❤️ — قابل للتعديل</footer>
+    </div>
+  )
+}
+\n// FILE: src/components/Game.jsx
+import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
+import CountryCard from './CountryCard'
+import clsx from 'classnames'
+
+// Simple game data model
+const initialCountries = () => ([
+  { id: 'KSA', name: { en: 'Saudi Arabia', ar: 'المملكة' }, owner: 'Player1', troops: 40, resources: 80, morale: 70, neighbors: ['UAE', 'EGY'] },
+  { id: 'UAE', name: { en: 'UAE', ar: 'الإمارات' }, owner: 'AI', troops: 30, resources: 60, morale: 65, neighbors: ['KSA'] },
+  { id: 'EGY', name: { en: 'Egypt', ar: 'مصر' }, owner: 'AI', troops: 25, resources: 50, morale: 60, neighbors: ['KSA'] },
+])
+
+export default function Game(){
+  const { t, i18n } = useTranslation()
+  const [countries, setCountries] = useState(initialCountries)
+  const [turn, setTurn] = useState(1)
+  const [activePlayer, setActivePlayer] = useState('Player1')
+  const [selected, setSelected] = useState(null) // الدولة المهاجمة/الناقلة
+  const [target, setTarget] = useState(null) // الدولة الهدف (للهجوم أو النقل)
+  const [log, setLog] = useState([])
+
+  useEffect(()=>{
+    // Basic AI move at end of Player1 turn
+    if(activePlayer === 'AI'){
+      const timer = setTimeout(() => aiMove(), 800)
+      return ()=>clearTimeout(timer)
+    }
+  },[activePlayer])
+
+  function addLog(text){
+    setLog(l => [text, ...l].slice(0, 50))
+  }
+
+  function selectCountry(id){
+    const country = countries.find(c => c.id === id)
+    if (!country) return
+
+    if (selected === id) {
+      // إلغاء التحديد إذا تم النقر على نفس الدولة
+      setSelected(null)
+      setTarget(null)
+    } else if (selected && country.owner !== activePlayer) {
+      // تحديد الهدف إذا كانت هناك دولة محددة مسبقًا والمالك مختلف
+      const selectedCountry = countries.find(c => c.id === selected)
+      if (selectedCountry.neighbors.includes(id)) {
+        setTarget(id)
+      } else {
+        addLog(t('selectCountry') + ': ' + t('notNeighbor'))
+      }
+    } else if (country.owner === activePlayer) {
+      // تحديد الدولة المهاجمة/الناقلة إذا كانت ملكًا للاعب النشط
+      setSelected(id)
+      setTarget(null)
+    } else {
+      // تجاهل النقر على دولة العدو إذا لم يتم تحديد دولة مهاجمة
+      addLog(t('selectCountry') + ': ' + t('notYours'))
+    }
+  }
+
+  function endTurn(){
+    // reinforcements
+    setCountries(prev => prev.map(c => c.owner === activePlayer ? {...c, troops: c.troops + Math.max(1, Math.floor(c.resources/40)) } : c))
+    addLog(`${activePlayer} ${t('endTurn')}`)
+    setActivePlayer(prev => prev === 'Player1' ? 'AI' : 'Player1')
+    setTurn(t => t + (activePlayer === 'AI' ? 0 : 1))
+    setSelected(null)
+  }
+
+  function attack(fromId, toId){
+    const from = countries.find(c=>c.id===fromId)
+    const to = countries.find(c=>c.id===toId)
+    if(!from || !to) return
+    if(from.owner !== activePlayer) return
+    if(from.troops < 2) { addLog('Not enough troops to attack'); return }
+
+    // Dice Roll Battle Algorithm (D6)
+    const rollDice = () => Math.floor(Math.random() * 6) + 1
+    
+    // Attacker rolls 3 dice (max 3 troops can attack at once)
+    const attackerRolls = [rollDice(), rollDice(), rollDice()].sort((a, b) => b - a)
+    // Defender rolls 2 dice (max 2 troops can defend at once)
+    const defenderRolls = [rollDice(), rollDice()].sort((a, b) => b - a)
+
+    let attackerLosses = 0
+    let defenderLosses = 0
+
+    // Compare highest attacker roll with highest defender roll
+    if (attackerRolls[0] > defenderRolls[0]) {
+      defenderLosses++
+    } else {
+      attackerLosses++
+    }
+
+    // Compare second highest rolls (if available)
+    if (attackerRolls.length > 1 && defenderRolls.length > 1) {
+      if (attackerRolls[1] > defenderRolls[1]) {
+        defenderLosses++
+      } else {
+        attackerLosses++
+      }
+    }
+
+    let newCountries = countries.map(c=>({...c}))
+    const fromIdx = newCountries.findIndex(c=>c.id===fromId)
+    const toIdx = newCountries.findIndex(c=>c.id===toId)
+
+    // Apply losses
+    newCountries[fromIdx].troops = Math.max(1, newCountries[fromIdx].troops - attackerLosses)
+    newCountries[toIdx].troops = Math.max(0, newCountries[toIdx].troops - defenderLosses)
+
+    let logMessage = `${from.owner} attacked ${to.id}. Rolls: Attacker [${attackerRolls.join(', ')}], Defender [${defenderRolls.join(', ')}]. `
+
+    // Check for capture
+    if(newCountries[toIdx].troops === 0){
+      newCountries[toIdx].owner = from.owner
+      // Move remaining troops to captured country
+      const movedTroops = Math.max(1, newCountries[fromIdx].troops - 1)
+      newCountries[toIdx].troops = movedTroops
+      newCountries[fromIdx].troops = newCountries[fromIdx].troops - movedTroops
+      logMessage += `${from.owner} captured ${i18n.language === 'ar' ? newCountries[toIdx].name.ar : newCountries[toIdx].name.en}!`
+    } else {
+      logMessage += `Attacker lost ${attackerLosses} troops, Defender lost ${defenderLosses} troops.`
+    }
+    
+    addLog(logMessage)
+
+    setCountries(newCountries)
+    setSelected(null)
+    setTarget(null)
+
+  }
+
+  function aiMove(){
+    // AI Move: More strategic approach
+    const aiCountries = countries.filter(c=>c.owner === 'AI')
+    if(aiCountries.length===0){ addLog('Player wins!'); return }
+    const playerCountries = countries.filter(c=>c.owner !== 'AI')
+    if(!playerCountries.length){ addLog('AI wins!'); return }
+
+    // 1. Find the best attack opportunity (AI country with high troops vs weakest neighbor)
+    let bestAttack = null
+    let maxAdvantage = -Infinity
+
+    aiCountries.forEach(attacker => {
+      if (attacker.troops < 5) return // Skip weak attackers
+
+      // Find all player neighbors
+      const potentialTargets = playerCountries.filter(target => attacker.neighbors.includes(target.id))
+
+      potentialTargets.forEach(target => {
+        // Advantage = Attacker Troops - Target Troops
+        const advantage = attacker.troops - target.troops
+        
+        if (advantage > maxAdvantage) {
+          maxAdvantage = advantage
+          bestAttack = { attacker, target }
+        }
+      })
+    })
+
+    // 2. Execute the best attack if a clear advantage exists (e.g., troops > target troops + 10)
+    if (bestAttack && bestAttack.attacker.troops > bestAttack.target.troops + 10) {
+      attack(bestAttack.attacker.id, bestAttack.target.id)
+    } else {
+      // 3. If no clear advantage, try to move troops to a border country
+      const borderCountry = aiCountries.find(c => c.neighbors.some(n => playerCountries.map(p => p.id).includes(n)))
+      if (borderCountry) {
+        // Find a non-border country to move troops from
+        const sourceCountry = aiCountries.find(c => !c.neighbors.some(n => playerCountries.map(p => p.id).includes(n)) && c.troops > 5)
+        if (sourceCountry) {
+          const moveAmount = Math.floor(sourceCountry.troops / 2)
+          if (moveAmount > 0) {
+            moveTroops(sourceCountry.id, borderCountry.id, moveAmount)
+          }
+        }
+      }
+      
+      // 4. If no move is possible, just make a random attack if possible
+      if (!bestAttack) {
+        const attacker = aiCountries.find(c=>c.troops > 5) || aiCountries[0]
+        const target = playerCountries[Math.floor(Math.random()*playerCountries.length)]
+        if(attacker && target && attacker.neighbors.includes(target.id)){
+          attack(attacker.id, target.id)
+        }
+      }
+    }
+
+    // finish AI turn
+    setTimeout(()=> setActivePlayer('Player1'), 600)
+  }
+
+  function moveTroops(fromId, toId, count){
+    const newCountries = countries.map(c=>({...c}))
+    const f = newCountries.find(c=>c.id===fromId)
+    const t = newCountries.find(c=>c.id===toId)
+    if(!f||!t) return
+    const moved = Math.min(count, Math.max(0, f.troops - 1))
+    f.troops -= moved
+    t.troops += moved
+    setCountries(newCountries)
+    addLog(`${activePlayer} moved ${moved} troops from ${fromId} to ${toId}`)
+    setSelected(null)
+    setTarget(null)
+  }
+
+  function checkVictory(){
+    const owners = new Set(countries.map(c=>c.owner))
+    if(owners.size === 1){
+      return Array.from(owners)[0]
+    }
+    return null
+  }
+
+  const winner = checkVictory()
+
+  return (
+    <div className="bg-white p-4 rounded-lg shadow">
+      <div className="flex justify-between items-center mb-4">
+        <div>
+          <div className="text-sm">{t('resources')}: {countries.reduce((s,c)=>s+c.resources,0)}</div>
+          <div className="text-sm">{t('reinforcements')}: automatic each turn</div>
+        </div>
+
+        <div className="text-right">
+          <div className="text-sm">Turn: {turn}</div>
+          <div className="text-sm">Active: {activePlayer}</div>
+        </div>
+      </div>
+
+      {winner ? (
+        <div className="p-4 bg-green-100 rounded">{t('winner')}: {winner}</div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {countries.map(c => (
+            <CountryCard
+              key={c.id}
+              country={c}
+              selected={selected === c.id}
+              target={target === c.id}
+              onSelect={selectCountry}
+              onAttack={attack}
+              onMove={moveTroops}
+              activePlayer={activePlayer}
+              selectedCountryId={selected}
+            />
+          ))}
+        </div>
+      )}
+
+      <div className="flex gap-2 mt-4">
+        <button className="px-3 py-1 bg-indigo-600 text-white rounded" onClick={endTurn}>{t('endTurn')}</button>
+        <button className="px-3 py-1 bg-yellow-400 rounded" onClick={()=>{ setCountries(initialCountries()); setTurn(1); setActivePlayer('Player1'); setLog([]); setSelected(null); setTarget(null) }}>{t('newGame')}</button>
+      </div>
+
+      <div className="mt-4">
+        <h3 className="font-semibold mb-2">Log</h3>
+        <div className="h-40 overflow-auto bg-gray-50 p-2 rounded">
+          {log.length === 0 ? <div className="text-sm text-gray-500">No events yet</div> : log.map((l, i) => <div key={i} className="text-sm">{l}</div>)}
+        </div>
+      </div>
+    </div>
+  )
+}
+\n// FILE: src/components/CountryCard.jsx
+import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
+export default function CountryCard({ country, selected, target, onSelect, onAttack, onMove, activePlayer, selectedCountryId }){
+  const { i18n, t } = useTranslation()
+  const [moveCount, setMoveCount] = useState(1)
+
+  const label = i18n.language === 'ar' ? country.name.ar : country.name.en
+
+  const isOwner = country.owner === activePlayer
+  const isSelected = selected
+  const isTarget = target
+
+  let cardClass = "country-card cursor-pointer"
+  if (isSelected) {
+    cardClass += " border-4 border-indigo-500"
+  } else if (isTarget) {
+    cardClass += " border-4 border-red-500"
+  } else if (selectedCountryId && country.neighbors.includes(selectedCountryId)) {
+    cardClass += " border-4 border-yellow-500"
+  }
+
+  return (
+    <div className={cardClass} onClick={() => onSelect(country.id)}>
+      <div className="flex justify-between items-start">
+        <div>
+          <h4 className="font-bold">{label} <span className="text-xs text-gray-500">({country.id})</span></h4>
+          <div className="text-sm">Owner: {country.owner}</div>
+        </div>
+        <div className="text-right">
+          <div className="text-sm">Troops: {country.troops}</div>
+          <div className="text-sm">{t('resources')}: {country.resources}</div>
+        </div>
+      </div>
+
+      <div className="mt-3 flex gap-2">
+        {/* زر التحديد أصبح غير ضروري لأن النقر على البطاقة يقوم بالتحديد */}
+        {/* {isOwner && <button onClick={()=> onSelect(country.id)} className="px-2 py-1 rounded border">{t('selectCountry')}</button>} */}
+
+        {isSelected && (
+          <>
+            <div className="flex items-center gap-1">
+              <input type="number" value={moveCount} onChange={e=>setMoveCount(Math.max(1, Number(e.target.value)||1))} className="w-16 px-2 py-1 border rounded" />
+              <button onClick={()=>{
+                if(selectedCountryId && isTarget) onMove(selectedCountryId, country.id, moveCount)
+              }} className="px-2 py-1 rounded bg-green-500 text-white">{t('move')}</button>
+            </div>
+            <button onClick={()=>{
+              if(selectedCountryId && isTarget) onAttack(selectedCountryId, country.id)
+            }} className="px-2 py-1 rounded bg-red-500 text-white">{t('attack')}</button>
+          </>
+        )}
+      </div>
+
+      <div className="mt-2 text-xs text-gray-500">Neighbors: {country.neighbors.join(', ')}</div>
+    </div>
+  )
+}
